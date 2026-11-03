@@ -12,7 +12,7 @@ namespace BoredProgrammer.Models
         [MaxLength(100, ErrorMessage = "UserName name cannot exceed 200 characters")]
         public string UserName { get; set; }
         [DataType(DataType.Date)]
-        public DateTime Commentdate { get; set; }
+        public DateTime CommentDate { get; set; }
         [Required]
         public string Content { get; set; }
         [ForeignKey("Post")]

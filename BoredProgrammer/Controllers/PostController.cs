@@ -1,4 +1,5 @@
 ﻿using BoredProgrammer.Data;
+using BoredProgrammer.Models;
 using BoredProgrammer.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -29,6 +30,22 @@ namespace BoredProgrammer.Controllers
             return View(posts);
         }
 
+        public async Task<IActionResult> Detail(int id)
+        {
+            if(id== null)
+            {
+                return NotFound();
+            }
+            var post = _context.Posts.Include(p => p.Category).Include(p => p.Comments)
+                .FirstOrDefault(p => p.Id == id);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+            return View(post);
+        }
+
         [HttpGet]
         public IActionResult Create()
         {
@@ -41,6 +58,19 @@ namespace BoredProgrammer.Controllers
                 }
             ).ToList();
             return View(postViewModel);
+        }
+        public JsonResult AddComment([FromBody]Comment comment)
+        {
+            comment.CommentDate = DateTime.Now;
+            _context.Comments.Add(comment);
+            _context.SaveChanges();
+
+            return Json(new
+            {
+                username = comment.UserName,
+                commentDate = comment.CommentDate.ToString("MMMM dd, yyyy"),
+                content = comment.Content
+            });
         }
         [HttpPost]
         public async Task<IActionResult> Create(PostViewModel postViewModel)

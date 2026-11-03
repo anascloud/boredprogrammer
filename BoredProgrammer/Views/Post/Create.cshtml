@@ -19,7 +19,7 @@
             <h2>@ViewData["Title"]</h2>
         </div>
         <div class="col-6 text-end">
-            <a class="btn btn-primary">Back to List</a>
+            <a class="btn btn-primary" asp-action="Index" asp-controller="Post">Back to List</a>
         </div>
     </div>
 
@@ -54,7 +54,7 @@
             <input asp-for="FeatureImage" class="form-control" />
         </div>
         <button type="submit" class="btn btn-primary mt-1">Create</button>
-        <a class="btn btn-secondary mt-1">Back to List</a>
+        <a class="btn btn-secondary mt-1" asp-action="Index" asp-controller="Post">Back to List</a>
     </form>
 </div>
 
