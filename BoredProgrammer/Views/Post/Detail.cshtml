@@ -3,79 +3,111 @@
 @{
     ViewData["Title"] = Model.Title;
 }
-
 <style>
-    .contect-wrapper {
+    .content-wrapper {
         padding: 20px;
-        max-width:;
-        1000px;
+        max-width: 1000px;
         margin: 0 auto;
-        font-family: sans-serif;
+        font-family: sans-serif
+    }
+
+    .feature-image {
+        width: 100%;
+        height: 500px;
+        object-fit: cover;
+        margin-bottom: 20px;
     }
 </style>
 
 <div class="text-end">
-    <a class="btn btn-secondary my-3">Edit Post</a>
-    <a class="btn btn-secondary m-3">Delete Post</a>
+    <a class="btn btn-secondary my-3" asp-controller="Post" asp-action="Edit" asp-route-id="@Model.Id">Edit Post</a>
+    <a class="btn btn-danger mx-3 my-3" asp-controller="Post" asp-action="Delete" asp-route-id="@Model.Id">Delete Post</a>
 </div>
 
-<div class="contect-wrapper">
+<div class="content-wrapper">
     <h1>@Model.Title</h1>
     <p>
-        <span class="badge badge-primary">
-            By:
-        </span>
-        @Model.Author |
-        <span class="badge badge-primary">
-            Published on 
-        </span>
-        @Model.PublishedDate.ToString("MMMM dd, yyyy")
-    </p>
-    <p><span class="basdge badge-secondary">Category</span>@Model.Category.Name</p>
-    <img src="@Model.FeatureImagePath" alt="@Model.Title" class="feature-image" />
-    <hr />
+        <span class="badge bg-primary">By:</span> @Model.Author | <span class="badge bg-primary">
+        Published on
+    </span> @Model.PublishedDate.ToString("MMMM dd,yyyy")
+</p>
+<p><span class="badge bg-secondary">Category</span> @Model.Category.Name</p>
+<img src="@Model.FeatureImagePath" alt="@Model.Title" class="feature-image" />
+<hr />
+<div>@Html.Raw(Model.Content)</div>
+<hr />
 
-    @if (Model.Comments.Any())
-    {
-        <div>
-            @foreach(var comment in Model.Comments)
-            {
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-body">
-                        <h4 class="card-title">@comment.UserName</h4>
-                        <p class="card-text text-muted">@comment.Commentdate.ToString("MMMM dd,yyyy")</p>
-                        <p class="card-text">@comment.Content</p>
-                    </div>
+@if (Model.Comments.Any())
+{
+    <div id="commentSection">
+        @foreach (var comment in Model.Comments)
+        {
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">@comment.UserName</h5>
+                    <p class="card-text text-muted">@comment.CommentDate.ToString("MMMM dd,yyyy")</p>
+                    <p class="card-text">@comment.Content</p>
                 </div>
-            }
-        </div>
-    }
-    else{
-        <p class="text-muted">No comments yet. Be the first one to comment.</p>
-    }
-    <h4>Add a Comment</h4>
-    <form id="commentForm">
-        <div class="form-group">
-            <label for="Username">Name</label>
-            <input for="Username" id="Username" name="Username" required class="form-control" />
-        </div>
-        <div class="form-group">
-            <label for="Content">Content</label>
-            <input for="Content" id="Content" name="Content" required class="form-control" />
-        </div>
-        <button type="submit" class="btn btn-primary mt-2 p-2 rounded">Submit Comment</button>
-    </form>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p class="text-muted">No comments yet. Be the first to comment</p>
+}
+<h4>Add a Comment</h4>
+
+<form id="commentForm">
+    <div class="form-group">
+        <label for="Username">Name</label>
+        <input for="Username" id="Username" name="Username" required class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="Content">Content</label>
+        <textarea for="Content" id="Content" name="Content" rows="3" required class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2 p-2 rounded">Submit Comment </button>
+</form>
 </div>
 
-@section Scripts{
+@section Scripts {
     <script>
         $(document).ready(function () {
-            $("commentForm").on('submit', function (event) {
+            $("#commentForm").on('submit', function (event) {
                 event.preventDefault();
-                var userName = $("#Username").val(); 
+                var userName = $("#Username").val();
                 var content = $("#Content").val();
                 var postId = @Model.Id;
-                console.log("userName", userName);
+
+                $.ajax({
+                    //https:localhost:7036/Post/AddComment
+                    url: '@Url.Action("AddComment", "Post")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        Username: userName,
+                        Content: content,
+                        PostId: postId
+                    }),
+                    success: function (response) {
+                        console.log("response", response);
+                        $('#commentForm')[0].reset();
+                        $('#commentSection').append(
+                            `
+                                <div class="card mb-3 shadow-sm">
+                                    <div class="card-body">
+                                    <h5 class="card-title">${response.username}</h5>
+                                     <p class="card-text text-muted">${response.commentDate}</p>
+                                     <p class="card-text">${response.content}</p>
+                                    </div>
+                                </div>
+                                    `
+                        )
+                    }
+                })
             });
         });
     </script>

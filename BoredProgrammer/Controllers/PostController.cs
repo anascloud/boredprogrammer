@@ -59,19 +59,6 @@ namespace BoredProgrammer.Controllers
             ).ToList();
             return View(postViewModel);
         }
-        public JsonResult AddComment([FromBody]Comment comment)
-        {
-            comment.CommentDate = DateTime.Now;
-            _context.Comments.Add(comment);
-            _context.SaveChanges();
-
-            return Json(new
-            {
-                username = comment.UserName,
-                commentDate = comment.CommentDate.ToString("MMMM dd, yyyy"),
-                content = comment.Content
-            });
-        }
         [HttpPost]
         public async Task<IActionResult> Create(PostViewModel postViewModel)
         {
@@ -91,6 +78,42 @@ namespace BoredProgrammer.Controllers
                 return RedirectToAction("Index");
             }
             return View(postViewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+            var postFromDb = await _context.Posts.FirstOrDefaultAsync(p=>p.Id == id);
+            EditViewModel editViewModel = new EditViewModel
+            {
+                Post = postFromDb,
+                Categories = _context.Categories.Select(c =>
+                new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                }
+            ).ToList()
+            };
+            return View(editViewModel);
+        }
+
+        public JsonResult AddComment([FromBody]Comment comment)
+        {
+            comment.CommentDate = DateTime.Now;
+            _context.Comments.Add(comment);
+            _context.SaveChanges();
+
+            return Json(new
+            { 
+                username = comment.UserName,
+                commentDate = comment.CommentDate.ToString("MMMM dd, yyyy"),
+                content = comment.Content
+            });
         }
 
         private async Task<String> UploadFileToFolder(IFormFile file)
