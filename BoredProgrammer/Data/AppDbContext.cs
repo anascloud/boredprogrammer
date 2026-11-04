@@ -1,5 +1,5 @@
-﻿using BoredProgrammer.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using SyncSyntax.Models;
 
 namespace BoredProgrammer.Data
 {
