@@ -14,9 +14,11 @@
     }
 </div>
 
-<div class="text-end my-2">
-    <a class="btn btn-primary" asp-action="Create" asp-controller="Post">Create New Post</a>
-</div>
+@if(User.IsInRole("Admin")){
+    <div class="text-end my-2">
+        <a class="btn btn-primary" asp-action="Create" asp-controller="Post">Create New Post</a>
+    </div>
+}
 
 <div class="row row-cols-3 g-4">
     @foreach(var post in Model)

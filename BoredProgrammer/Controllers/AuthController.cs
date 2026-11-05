@@ -104,6 +104,10 @@ namespace SyncSyntax.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Post");
         }
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }
 }
 

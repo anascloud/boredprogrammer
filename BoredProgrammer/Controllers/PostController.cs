@@ -1,6 +1,7 @@
 ﻿using BoredProgrammer.Data;
 using BoredProgrammer.Models;
 using BoredProgrammer.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +54,7 @@ namespace SyncSyntax.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles ="Admin")]
         public IActionResult Create()
         {
             var postViewModel = new PostViewModel();
@@ -68,6 +70,7 @@ namespace SyncSyntax.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(PostViewModel postViewModel)
         {
             if (ModelState.IsValid)
@@ -98,6 +101,7 @@ namespace SyncSyntax.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             if (id == null)
@@ -128,6 +132,7 @@ namespace SyncSyntax.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(EditViewModel editViewModel)
         {
             if (!ModelState.IsValid)
@@ -173,6 +178,7 @@ namespace SyncSyntax.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var postFromDb = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
@@ -184,6 +190,7 @@ namespace SyncSyntax.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirm(int id)
         {
             var postFromDb = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
@@ -201,6 +208,7 @@ namespace SyncSyntax.Controllers
             _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
+        [Authorize]
         public JsonResult AddComment([FromBody] Comment comment)
         {
             comment.CommentDate = DateTime.Now;
