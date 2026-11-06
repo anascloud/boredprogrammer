@@ -1,0 +1,233 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var categoryLabels = System.Text.Json.JsonSerializer.Serialize(Model.CategoryStats.Select(c => c.Name));
+    var categoryData = System.Text.Json.JsonSerializer.Serialize(Model.CategoryStats.Select(c => c.Count));
+    var monthLabels = System.Text.Json.JsonSerializer.Serialize(Model.MonthlyStats.Select(m => m.Label));
+    var monthData = System.Text.Json.JsonSerializer.Serialize(Model.MonthlyStats.Select(m => m.Count));
+}
+
+<section class="page-head">
+    <div class="row align-items-end g-3">
+        <div class="col-lg-8">
+            <span class="eyebrow">Live analytics</span>
+            <h1 class="mt-2">Product <span class="text-gradient">dashboard</span></h1>
+            <p class="mb-0">Real data from SQL Server, publishing cadence and AI usage — updated on every request.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <span class="status-pill" id="healthPill"><span class="status-dot"></span> Checking system…</span>
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="btn btn-gradient" asp-controller="Post" asp-action="Create"><i class="bi bi-plus-lg me-1"></i>New post</a>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+        <div class="kpi reveal">
+            <div class="kpi-icon"><i class="bi bi-journal-richtext"></i></div>
+            <div class="kpi-label"><i class="bi bi-collection"></i> Posts</div>
+            <div class="kpi-value">@Model.PostCount</div>
+            <div class="kpi-foot">Across @Model.CategoryCount categories</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="kpi reveal">
+            <div class="kpi-icon"><i class="bi bi-tags"></i></div>
+            <div class="kpi-label"><i class="bi bi-diagram-3"></i> Categories</div>
+            <div class="kpi-value">@Model.CategoryCount</div>
+            <div class="kpi-foot">Content taxonomy</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="kpi reveal">
+            <div class="kpi-icon"><i class="bi bi-chat-square-text"></i></div>
+            <div class="kpi-label"><i class="bi bi-chat-dots"></i> Comments</div>
+            <div class="kpi-value">@Model.CommentCount</div>
+            <div class="kpi-foot">Reader engagement</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="kpi reveal">
+            <div class="kpi-icon"><i class="bi bi-stars"></i></div>
+            <div class="kpi-label"><i class="bi bi-cpu"></i> AI responses</div>
+            <div class="kpi-value">@Model.AiTotal</div>
+            <div class="kpi-foot">@(Model.AiUsage.LastUsedUtc is null ? "No calls this session" : $"Last used {Model.AiUsage.LastUsedUtc:HH:mm} UTC")</div>
+        </div>
+    </div>
+</section>
+
+<section class="row g-3 mb-3">
+    <div class="col-lg-7">
+        <div class="chart-card reveal h-100">
+            <h3><i class="bi bi-bar-chart-line"></i> Publishing cadence <span class="text-soft small ms-auto">last 6 months</span></h3>
+            <div class="chart-box"><canvas id="monthlyChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="chart-card reveal h-100">
+            <h3><i class="bi bi-pie-chart"></i> Content mix</h3>
+            <div class="chart-box"><canvas id="categoryChart"></canvas></div>
+        </div>
+    </div>
+</section>
+
+<section class="row g-3">
+    <div class="col-lg-7">
+        <div class="panel reveal h-100">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <h3 class="m-0" style="font-size:1rem;"><i class="bi bi-clock-history me-2"></i>Recent posts</h3>
+                <a class="chip" asp-controller="Post" asp-action="Index">View all</a>
+            </div>
+            @if (Model.RecentPosts.Any())
+            {
+                @foreach (var post in Model.RecentPosts)
+                {
+                    <div class="list-row">
+                        <span class="feature-icon" style="width:36px;height:36px;font-size:.9rem;"><i class="bi bi-file-earmark-text"></i></span>
+                        <span class="min-w-0">
+                            <span class="row-title d-block text-truncate">@post.Title</span>
+                            <span class="row-sub">@post.PublishedDate.ToString("MMM dd, yyyy") · @post.Author</span>
+                        </span>
+                        <span class="row-badge badge badge-category">@(post.Category?.Name ?? "General")</span>
+                        <a class="icon-btn ms-2" asp-controller="Post" asp-action="Detail" asp-route-id="@post.Id" aria-label="Open post"><i class="bi bi-arrow-up-right"></i></a>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-soft mb-0">No posts yet.</p>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="panel reveal mb-3">
+            <h3 class="mb-3" style="font-size:1rem;"><i class="bi bi-stars me-2"></i>AI telemetry</h3>
+            <div class="d-grid gap-2">
+                <div class="list-row">
+                    <span class="row-title">Chat messages</span>
+                    <span class="row-badge chip">@Model.AiUsage.Chats</span>
+                </div>
+                <div class="list-row">
+                    <span class="row-title">Summaries</span>
+                    <span class="row-badge chip">@Model.AiUsage.Summaries</span>
+                </div>
+                <div class="list-row">
+                    <span class="row-title">Draft generations</span>
+                    <span class="row-badge chip">@Model.AiUsage.Generations</span>
+                </div>
+            </div>
+            <div class="status-pill mt-3" id="aiPill">
+                <span class="status-dot" id="aiDot"></span>
+                <span id="aiPillText">Checking AI configuration…</span>
+            </div>
+        </div>
+
+        <div class="panel reveal">
+            <h3 class="mb-3" style="font-size:1rem;"><i class="bi bi-chat-left-text me-2"></i>Recent comments</h3>
+            @if (Model.RecentComments.Any())
+            {
+                @foreach (var comment in Model.RecentComments)
+                {
+                    <div class="list-row">
+                        <span class="avatar">@(string.IsNullOrWhiteSpace(comment.UserName) ? "U" : comment.UserName[..1].ToUpper())</span>
+                        <span class="min-w-0">
+                            <span class="row-title d-block text-truncate">@comment.UserName</span>
+                            <span class="row-sub text-truncate d-block">@comment.Content</span>
+                        </span>
+                        <span class="row-badge row-sub text-nowrap">@comment.CommentDate.ToString("MMM dd")</span>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-soft mb-0">No comments yet.</p>
+            }
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            const muted = "#93a4bd";
+            const grid = "rgba(148,163,184,.12)";
+
+            const monthCanvas = document.getElementById("monthlyChart");
+            if (monthCanvas && window.Chart) {
+                new Chart(monthCanvas, {
+                    type: "bar",
+                    data: {
+                        labels: @Html.Raw(monthLabels),
+                        datasets: [{
+                            label: "Posts",
+                            data: @Html.Raw(monthData),
+                            backgroundColor: "rgba(99,102,241,.55)",
+                            hoverBackgroundColor: "rgba(34,211,238,.8)",
+                            borderRadius: 8,
+                            borderSkipped: false,
+                            maxBarThickness: 46
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: muted } },
+                            y: { beginAtZero: true, ticks: { color: muted, precision: 0 }, grid: { color: grid } }
+                        }
+                    }
+                });
+            }
+
+            const categoryCanvas = document.getElementById("categoryChart");
+            if (categoryCanvas && window.Chart) {
+                new Chart(categoryCanvas, {
+                    type: "doughnut",
+                    data: {
+                        labels: @Html.Raw(categoryLabels),
+                        datasets: [{
+                            data: @Html.Raw(categoryData),
+                            backgroundColor: ["#6366f1", "#22d3ee", "#ec4899", "#f59e0b", "#34d399", "#a78bfa"],
+                            borderColor: "rgba(7,11,20,.6)",
+                            borderWidth: 3,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: "62%",
+                        plugins: {
+                            legend: { position: "bottom", labels: { color: muted, usePointStyle: true, boxWidth: 8, padding: 16 } }
+                        }
+                    }
+                });
+            }
+
+            fetch("/health").then(r => {
+                const pill = document.getElementById("healthPill");
+                if (pill) {
+                    pill.innerHTML = r.ok
+                        ? '<span class="status-dot"></span> All systems operational'
+                        : '<span class="status-dot offline"></span> Degraded';
+                }
+            }).catch(() => {
+                const pill = document.getElementById("healthPill");
+                if (pill) pill.innerHTML = '<span class="status-dot offline"></span> Health check unavailable';
+            });
+
+            fetch("/ai/status").then(r => r.json()).then(data => {
+                const text = document.getElementById("aiPillText");
+                const dot = document.getElementById("aiDot");
+                if (text) text.textContent = data.configured ? "Groq AI connected" : "Groq key not configured yet";
+                if (!data.configured && dot) dot.classList.add("offline");
+            }).catch(() => { });
+        })();
+    </script>
+}

@@ -1,0 +1,74 @@
+@{
+    ViewData["Title"] = "AI Assistant";
+}
+
+<section class="page-head">
+    <span class="eyebrow">Applied AI · live</span>
+    <h1 class="mt-2">Your guide to my <span class="text-gradient">experience</span></h1>
+    <p class="mb-0">Ask about projects, architecture, skills, availability — or which post to read first. The assistant answers from my CV and this blog.</p>
+</section>
+
+<div class="assistant-shell" data-ai-chat data-endpoint="@Url.Action("Chat", "Ai")">
+    <aside class="assistant-side glass">
+        <span class="feature-icon"><i class="bi bi-stars"></i></span>
+        <h1 class="mt-3 mb-1">AI Assistant</h1>
+        <p class="text-soft small mb-0">Groq-powered, grounded in @PortfolioProfile.Name's CV and every published post.</p>
+
+        <div class="status-pill mt-3" id="assistantStatus"><span class="status-dot"></span> Powered by Groq</div>
+
+        <hr class="hairline my-3" />
+
+        <span class="eyebrow">Try asking</span>
+        <div class="suggest-grid">
+            <button type="button" data-prompt="Give me a 60-second summary of your career."><i class="bi bi-person-badge me-2"></i>60-second career summary</button>
+            <button type="button" data-prompt="Which projects best demonstrate AI engineering?"><i class="bi bi-cpu me-2"></i>Best AI engineering work</button>
+            <button type="button" data-prompt="What is your experience with .NET, cloud and frontend?"><i class="bi bi-stack me-2"></i>Full-stack depth</button>
+            <button type="button" data-prompt="How do you approach architecture and code quality?"><i class="bi bi-diagram-3 me-2"></i>Architecture philosophy</button>
+            <button type="button" data-prompt="Which blog posts should I read first and why?"><i class="bi bi-journal-text me-2"></i>Recommended reading</button>
+            <button type="button" data-prompt="Summarise the strongest reasons to hire you."><i class="bi bi-briefcase me-2"></i>Why hire you?</button>
+        </div>
+
+        <hr class="hairline my-3" />
+
+        <div class="d-flex flex-wrap gap-2">
+            <a class="chip" asp-controller="Home" asp-action="Resume"><i class="bi bi-person-vcard"></i>Full CV</a>
+            <a class="chip" asp-controller="Home" asp-action="Features"><i class="bi bi-grid"></i>Features</a>
+        </div>
+    </aside>
+
+    <div class="assistant-main">
+        <div class="ai-messages" data-ai-messages>
+            <div class="ai-msg ai-msg-bot">
+                <p>Hi — I'm the AI layer of this demo. I can answer questions about @PortfolioProfile.Name's <strong>9 years</strong> across .NET, cloud and applied AI, recommend blog posts, or explain how this app is built. What would you like to know?</p>
+            </div>
+            <div class="ai-suggestions">
+                <button type="button" data-prompt="What did you build with RAG and vector search?">RAG experience</button>
+                <button type="button" data-prompt="How do you keep APIs fast and reliable?">Performance</button>
+                <button type="button" data-prompt="Are you available for a senior full-time role?">Availability</button>
+            </div>
+        </div>
+
+        <form class="ai-form" data-ai-form>
+            <textarea data-ai-input rows="1" maxlength="1500" placeholder="Ask anything about experience, projects or the blog…" aria-label="Message"></textarea>
+            <button class="btn btn-gradient ai-send" data-ai-send type="submit" aria-label="Send message"><i class="bi bi-send"></i></button>
+        </form>
+        <div class="ai-foot">
+            <span>Rate limited to 15 messages/min per IP · answers may be imperfect</span>
+            <span>Groq · llama-3.3</span>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        fetch("/ai/status").then(r => r.json()).then(data => {
+            const pill = document.getElementById("assistantStatus");
+            if (!pill) return;
+            if (data.configured) {
+                pill.innerHTML = '<span class="status-dot"></span> Groq AI connected';
+            } else {
+                pill.innerHTML = '<span class="status-dot offline"></span> Groq key not configured';
+            }
+        }).catch(() => { });
+    </script>
+}

@@ -13,17 +13,17 @@ namespace SyncSyntax.Models
 
         [Required(ErrorMessage = "The Title is Required")]
         [MaxLength(400, ErrorMessage = "The title cannot exceed 400 characters")]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "The Content is Required")]
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "The Author is Required")]
         [MaxLength(100, ErrorMessage = "The Name cannot exceed 100 characters")]
-        public string Author { get; set; }
+        public string Author { get; set; } = string.Empty;
 
         [ValidateNever]
-        public string FeatureImagePath { get; set; }
+        public string FeatureImagePath { get; set; } = string.Empty;
 
         [DataType(DataType.Date)]
         public DateTime PublishedDate { get; set; } = DateTime.Now;
@@ -32,8 +32,8 @@ namespace SyncSyntax.Models
         [DisplayName("Category")]
         public int CategoryId { get; set; }
         [ValidateNever]
-        public Category Category { get; set; }
+        public Category Category { get; set; } = null!;
         [ValidateNever]
-        public ICollection<Comment> Comments { get; set; }
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 }

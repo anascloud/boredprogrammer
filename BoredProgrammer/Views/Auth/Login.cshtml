@@ -1,48 +1,71 @@
 ﻿@model LoginViewModel
-
 @{
     ViewData["Title"] = "Login";
 }
 
-<style>
-    .content-wrapper {
-        padding: 20px;
-        max-width: 1000px;
-        margin: 0 auto;
-        font-family: sans-serif
-    }
-</style>
+<div class="auth-shell">
+    <div class="auth-card">
+        <aside class="auth-side d-none d-md-flex flex-column justify-content-between">
+            <div>
+                <a class="brand mb-4 d-inline-flex" asp-controller="Post" asp-action="Index">
+                    <span class="brand-mark"><i class="bi bi-stars"></i></span>
+                    <span>anascloud</span>
+                </a>
+                <h2>Welcome back to the <span class="text-gradient">build</span>.</h2>
+                <p class="text-soft mt-2">Sign in to comment, and use the demo admin account to try the full authoring + AI content studio.</p>
+                <ul>
+                    <li><i class="bi bi-check-circle"></i> Admin-only post editor with TinyMCE</li>
+                    <li><i class="bi bi-check-circle"></i> AI draft generation via Groq</li>
+                    <li><i class="bi bi-check-circle"></i> Live analytics dashboard</li>
+                </ul>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                <span class="chip">.NET 10</span>
+                <span class="chip">Identity</span>
+                <span class="chip">Groq AI</span>
+            </div>
+        </aside>
 
+        <div class="auth-form">
+            <span class="eyebrow">Sign in</span>
+            <h1 class="mt-2 mb-1" style="font-size:1.5rem;">Login</h1>
+            <p class="text-soft small mb-3">Use your account or the demo admin below.</p>
 
-<div class="content-wrapper">
-    <div class="row">
-        <div class="col-6">
-            <h2>@ViewData["Title"]</h2>
-        </div>
+            <div class="demo-cred mb-3">
+                <div class="d-flex align-items-center justify-content-between gap-2">
+                    <span>Demo admin<br /><code>admin@gmail.com</code> / <code>admin123</code></span>
+                    <button type="button" class="btn btn-sm btn-ghost" id="fillDemo"><i class="bi bi-magic"></i> Fill</button>
+                </div>
+            </div>
 
-        <div class="col-6 text-end">
-            <a class="btn btn-primary" asp-action="Index" asp-controller="Post">Back to List</a>
+            <form asp-action="Login" asp-controller="Auth" method="post">
+                <div asp-validation-summary="All" class="text-danger small mb-2"></div>
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Email"></label>
+                    <input asp-for="Email" class="form-control" placeholder="you@example.com" autocomplete="username" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Password"></label>
+                    <input asp-for="Password" class="form-control" type="password" placeholder="••••••••" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn btn-gradient w-100"><i class="bi bi-box-arrow-in-right me-1"></i>Sign in</button>
+            </form>
+
+            <p class="text-soft small mt-3 mb-0">
+                New here? <a asp-action="Register" asp-controller="Auth">Create an account</a>
+            </p>
         </div>
     </div>
-
-    <hr />
-
-    <form asp-action="Login" asp-controller="Auth" method="post">
-        <div class="validation-summary">
-            <div asp-validation-summary="All" class="text-danger"></div>
-        </div>
-        <div class="form-group">
-            <label asp-for="Email"></label>
-            <input asp-for="Email" class="form-control" />
-            <span asp-validation-for="Email" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Password"></label>
-            <input asp-for="Password" class="form-control" />
-            <span asp-validation-for="Password" class="text-danger"></span>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-1">Login</button>
-        <a class="btn btn-secondary mt-1" asp-action="Index" asp-controller="Post">Back to List</a>
-    </form>
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById("fillDemo")?.addEventListener("click", function () {
+            document.getElementById("Email").value = "admin@gmail.com";
+            document.getElementById("Password").value = "admin123";
+            window.bpToast?.("Demo admin credentials filled");
+        });
+    </script>
+}

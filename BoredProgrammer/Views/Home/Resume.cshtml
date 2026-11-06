@@ -1,0 +1,167 @@
+@{
+    ViewData["Title"] = "Resume";
+    var initials = PortfolioProfile.Name[..1].ToUpper();
+}
+
+<section class="page-head">
+    <div class="resume-head reveal">
+        <div class="resume-avatar">@initials</div>
+        <div class="flex-grow-1">
+            <h1>@PortfolioProfile.Name</h1>
+            <div class="role">@PortfolioProfile.Role</div>
+            <div class="d-flex flex-wrap gap-3 mt-2 text-soft small">
+                <span><i class="bi bi-geo-alt me-1"></i>@PortfolioProfile.Location</span>
+                <span><i class="bi bi-envelope me-1"></i>@PortfolioProfile.Email</span>
+                <span><i class="bi bi-briefcase me-1"></i>@PortfolioProfile.YearsExperience+ years</span>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gradient" href="mailto:@PortfolioProfile.Email"><i class="bi bi-send me-2"></i>Hire me</a>
+            <button class="btn btn-ghost" type="button" data-copy="@PortfolioProfile.Email"><i class="bi bi-clipboard me-2"></i>Copy email</button>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="panel reveal h-100">
+                <span class="eyebrow">Profile</span>
+                <h2 class="mt-2 mb-3" style="font-size:1.35rem;">Applied AI, shipped as product.</h2>
+                <p class="text-soft mb-0" style="line-height:1.8;">@PortfolioProfile.Summary</p>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    @foreach (var stat in PortfolioProfile.Stats)
+                    {
+                        <span class="chip"><i class="bi bi-check2-circle"></i>@stat</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="panel reveal h-100">
+                <span class="eyebrow">Highlights</span>
+                <div class="d-grid gap-2 mt-3">
+                    <div class="list-row">
+                        <i class="bi bi-cpu text-gradient"></i>
+                        <span><span class="row-title d-block">AI products</span><span class="row-sub">RAG, agents, LLM gateways</span></span>
+                    </div>
+                    <div class="list-row">
+                        <i class="bi bi-window text-gradient"></i>
+                        <span><span class="row-title d-block">Full-stack</span><span class="row-sub">.NET APIs + React/TS</span></span>
+                    </div>
+                    <div class="list-row">
+                        <i class="bi bi-cloud text-gradient"></i>
+                        <span><span class="row-title d-block">Cloud</span><span class="row-sub">Azure, AWS, Kubernetes</span></span>
+                    </div>
+                    <div class="list-row">
+                        <i class="bi bi-people text-gradient"></i>
+                        <span><span class="row-title d-block">Leadership</span><span class="row-sub">Squad lead, mentoring, hiring</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-head reveal">
+        <span class="eyebrow">Toolkit</span>
+        <h2 class="mt-1">Skills across the <span class="text-gradient">full stack</span></h2>
+    </div>
+    <div class="row g-3">
+        @foreach (var skill in PortfolioProfile.Skills)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="skill-card reveal">
+                    <h3><i class="bi @skill.Icon"></i>@skill.Name</h3>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var item in skill.Skills)
+                        {
+                            <span class="tag">@item</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section">
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="panel reveal">
+                <span class="eyebrow">Experience</span>
+                <h2 class="mt-1 mb-4" style="font-size:1.35rem;">@PortfolioProfile.YearsExperience years of delivery</h2>
+                <div class="timeline">
+                    @foreach (var job in PortfolioProfile.Experience)
+                    {
+                        <div class="timeline-item">
+                            <h3>@job.Role</h3>
+                            <div class="t-meta">@job.Company · @job.Period · @job.Location</div>
+                            <p class="text-soft mb-1" style="font-size:.88rem;">@job.Summary</p>
+                            <ul>
+                                @foreach (var highlight in job.Highlights)
+                                {
+                                    <li>@highlight</li>
+                                }
+                            </ul>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var tech in job.Stack)
+                                {
+                                    <span class="tag">@tech</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="panel reveal mb-4">
+                <span class="eyebrow">Selected projects</span>
+                <div class="d-grid gap-3 mt-3">
+                    @foreach (var project in PortfolioProfile.Projects)
+                    {
+                        <div class="project-card">
+                            <span class="feature-icon" style="width:38px;height:38px;font-size:1rem;"><i class="bi @project.Icon"></i></span>
+                            <h3>@project.Name</h3>
+                            <p class="mb-2">@project.Description</p>
+                            <div class="impact mb-2"><i class="bi bi-graph-up-arrow me-1"></i>@project.Impact</div>
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach (var tech in project.Stack)
+                                {
+                                    <span class="tag">@tech</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="panel reveal">
+                <span class="eyebrow">Certifications</span>
+                <ul class="list-unstyled mt-3 mb-0">
+                    @foreach (var cert in PortfolioProfile.Certifications)
+                    {
+                        <li class="d-flex gap-2 mb-2" style="font-size:.86rem;">
+                            <i class="bi bi-patch-check-fill" style="color:#67e8f9;margin-top:2px;"></i>
+                            <span>@cert</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="panel reveal text-center">
+        <span class="eyebrow">Next step</span>
+        <h2 class="mt-2 mb-2" style="font-size:clamp(1.5rem,3vw,2.2rem);">Need someone who can own the architecture <em>and</em> ship?</h2>
+        <p class="text-soft mb-3">I'm available for senior full-stack and AI engineering roles, contract or full-time.</p>
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            <a class="btn btn-gradient px-4" href="mailto:@PortfolioProfile.Email"><i class="bi bi-envelope me-2"></i>Email me</a>
+            <a class="btn btn-ghost px-4" asp-controller="Ai" asp-action="Assistant"><i class="bi bi-stars me-2"></i>Ask my AI about me</a>
+        </div>
+    </div>
+</section>

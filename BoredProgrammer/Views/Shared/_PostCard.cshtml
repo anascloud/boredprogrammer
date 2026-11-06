@@ -1,0 +1,33 @@
+@using BoredProgrammer.Helpers
+@model Post
+@{
+    var plain = RemoveHtmlTagHelper.RemoveHtmlTags(Model.Content ?? string.Empty);
+    var excerpt = plain.Length > 135 ? plain[..135] + "…" : plain;
+    var words = plain.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+    var readMinutes = Math.Max(1, (int)Math.Ceiling(words / 220.0));
+    var image = string.IsNullOrWhiteSpace(Model.FeatureImagePath) ? "/images/placeholder.svg" : Model.FeatureImagePath;
+}
+<article class="post-card reveal">
+    <a class="thumb" asp-controller="Post" asp-action="Detail" asp-route-id="@Model.Id" aria-label="@Model.Title">
+        <img src="@image" alt="@Model.Title" loading="lazy" onerror="this.src='/images/placeholder.svg'" />
+        <span class="badge badge-category">@(Model.Category?.Name ?? "General")</span>
+    </a>
+    <div class="body">
+        <div class="meta">
+            <i class="bi bi-calendar3"></i> @Model.PublishedDate.ToString("MMM dd, yyyy")
+            <span class="text-soft">·</span>
+            <i class="bi bi-clock"></i> @readMinutes min read
+        </div>
+        <h3><a asp-controller="Post" asp-action="Detail" asp-route-id="@Model.Id">@Model.Title</a></h3>
+        <p class="excerpt">@excerpt</p>
+        <div class="foot">
+            <span class="author">
+                <span class="avatar">@(string.IsNullOrWhiteSpace(Model.Author) ? "A" : Model.Author[..1].ToUpper())</span>
+                @Model.Author
+            </span>
+            <a class="btn btn-sm btn-ghost" asp-controller="Post" asp-action="Detail" asp-route-id="@Model.Id">
+                Read <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</article>

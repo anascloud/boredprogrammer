@@ -1,4 +1,4 @@
-﻿using BoredProgrammer.Data;
+using BoredProgrammer.Data;
 using BoredProgrammer.Models;
 using BoredProgrammer.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -21,35 +21,66 @@ namespace SyncSyntax.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index(int? categoryId)
+        public IActionResult Index(int? categoryId, string? q, int page = 1)
         {
+            const int pageSize = 6;
+
             var postQuery = _context.Posts.Include(p => p.Category).AsQueryable();
 
             if (categoryId.HasValue)
             {
                 postQuery = postQuery.Where(p => p.CategoryId == categoryId);
             }
-            var posts = postQuery.ToList();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var term = q.Trim();
+                postQuery = postQuery.Where(p =>
+                    p.Title.Contains(term) ||
+                    p.Content.Contains(term) ||
+                    p.Author.Contains(term));
+            }
+
+            var totalPosts = postQuery.Count();
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalPosts / (double)pageSize));
+            page = Math.Clamp(page, 1, totalPages);
+
+            var posts = postQuery
+                .OrderByDescending(p => p.PublishedDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             ViewBag.Categories = _context.Categories.ToList();
+            ViewBag.CategoryId = categoryId;
+            ViewBag.Search = q;
+            ViewBag.Page = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalPosts = totalPosts;
+
             return View(posts);
         }
 
         [HttpGet]
         public async Task<IActionResult> Detail(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var post = _context.Posts.Include(p => p.Category).Include(p => p.Comments)
-                .FirstOrDefault(p => p.Id == id);
+            var post = await _context.Posts
+                .Include(p => p.Category)
+                .Include(p => p.Comments)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (post == null)
             {
                 return NotFound();
             }
+
+            ViewBag.RelatedPosts = await _context.Posts
+                .Include(p => p.Category)
+                .Where(p => p.CategoryId == post.CategoryId && p.Id != post.Id)
+                .OrderByDescending(p => p.PublishedDate)
+                .Take(3)
+                .ToListAsync();
+
             return View(post);
         }
 
@@ -75,16 +106,24 @@ namespace SyncSyntax.Controllers
         {
             if (ModelState.IsValid)
             {
-                var inputFileExtension = Path.GetExtension(postViewModel.FeatureImage.FileName).ToLower();
-                bool isAllowed = _allowedExtension.Contains(inputFileExtension);
-
-                if (!isAllowed)
+                if (postViewModel.FeatureImage is not null)
                 {
-                    ModelState.AddModelError("", "Invalid Image Format. Allowed Format are .jpg, .jpeg, .png");
-                    return View(postViewModel);
+                    var inputFileExtension = Path.GetExtension(postViewModel.FeatureImage.FileName).ToLower();
+                    bool isAllowed = _allowedExtension.Contains(inputFileExtension);
+
+                    if (!isAllowed)
+                    {
+                        ModelState.AddModelError("", "Invalid Image Format. Allowed Format are .jpg, .jpeg, .png");
+                        return View(postViewModel);
+                    }
+
+                    postViewModel.Post.FeatureImagePath = await UploadFiletoFolder(postViewModel.FeatureImage);
+                }
+                else
+                {
+                    postViewModel.Post.FeatureImagePath = "/images/placeholder.svg";
                 }
 
-                postViewModel.Post.FeatureImagePath = await UploadFiletoFolder(postViewModel.FeatureImage);
                 await _context.Posts.AddAsync(postViewModel.Post);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
@@ -104,11 +143,6 @@ namespace SyncSyntax.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var postFromDb = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
 
             if (postFromDb == null)
@@ -158,7 +192,7 @@ namespace SyncSyntax.Controllers
                     return View(editViewModel);
                 }
 
-                var existingFilePath = Path.Combine(_webHostEnvironment.WebRootPath, "Images", Path.GetFileName(postFromDb.FeatureImagePath));
+                var existingFilePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", Path.GetFileName(postFromDb.FeatureImagePath));
 
                 if (System.IO.File.Exists(existingFilePath))
                 {
@@ -195,25 +229,42 @@ namespace SyncSyntax.Controllers
         {
             var postFromDb = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
 
-            if (string.IsNullOrEmpty(postFromDb.FeatureImagePath))
+            if (postFromDb == null)
             {
-                var existingFilePath = Path.Combine(_webHostEnvironment.WebRootPath, "Images", Path.GetFileName(postFromDb.FeatureImagePath));
+                return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(postFromDb.FeatureImagePath))
+            {
+                var existingFilePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", Path.GetFileName(postFromDb.FeatureImagePath));
 
                 if (System.IO.File.Exists(existingFilePath))
                 {
                     System.IO.File.Delete(existingFilePath);
                 }
             }
+
             _context.Posts.Remove(postFromDb);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
+
         [Authorize]
-        public JsonResult AddComment([FromBody] Comment comment)
+        [HttpPost]
+        public async Task<IActionResult> AddComment([FromBody] Comment comment)
         {
+            if (string.IsNullOrWhiteSpace(comment.Content) || comment.PostId == 0)
+            {
+                return BadRequest();
+            }
+
+            comment.UserName = string.IsNullOrWhiteSpace(comment.UserName)
+                ? (User.Identity?.Name ?? "Guest")
+                : comment.UserName.Trim();
             comment.CommentDate = DateTime.Now;
+
             _context.Comments.Add(comment);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Json(new
             {

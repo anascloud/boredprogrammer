@@ -1,81 +1,138 @@
 ﻿@model EditViewModel
-
 @{
     ViewData["Title"] = "Edit Post";
+    var currentImage = string.IsNullOrWhiteSpace(Model.Post.FeatureImagePath) ? "/images/placeholder.svg" : Model.Post.FeatureImagePath;
 }
 
+<section class="page-head">
+    <span class="eyebrow">Admin · editor</span>
+    <h1 class="mt-2">Edit <span class="text-gradient">post</span></h1>
+    <p class="mb-0">Refine the content, swap the cover image or ask AI for a fresh angle.</p>
+</section>
 
-<style>
-    .content-wrapper {
-        padding: 20px;
-        max-width: 1000px;
-        margin: 0 auto;
-        font-family: sans-serif
-    }
-</style>
+<div class="row g-4">
+    <div class="col-lg-8">
+        <form asp-action="Edit" asp-controller="Post" method="post" enctype="multipart/form-data" class="panel">
+            <div class="form-head mb-3">
+                <h2 style="font-size:1.15rem;" class="m-0"><i class="bi bi-pencil-square me-2"></i>Post details</h2>
+                <a class="btn btn-sm btn-ghost" asp-action="Index"><i class="bi bi-arrow-left me-1"></i>Back</a>
+            </div>
 
+            <div asp-validation-summary="All" class="text-danger mb-2"></div>
+            <input asp-for="Post.Id" hidden />
 
-<div class="content-wrapper">
-    <div class="row">
-        <div class="col-6">
-            <h2>@ViewData["Title"]</h2>
-        </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Post.Title"></label>
+                <input asp-for="Post.Title" class="form-control" />
+                <span asp-validation-for="Post.Title" class="text-danger small"></span>
+            </div>
 
-        <div class="col-6 text-end">
-            <a class="btn btn-primary" asp-action="Index" asp-controller="Post">Back to List</a>
-        </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label" asp-for="Post.CategoryId"></label>
+                    <select asp-for="Post.CategoryId" asp-items="Model.Categories" class="form-select">
+                        <option value="">Select category</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" asp-for="Post.Author"></label>
+                    <input asp-for="Post.Author" class="form-control" />
+                    <span asp-validation-for="Post.Author" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" asp-for="Post.Content"></label>
+                <textarea asp-for="Post.Content" class="form-control" rows="12"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" asp-for="FeatureImage"></label>
+                <input asp-for="FeatureImage" class="form-control" accept=".jpg,.jpeg,.png" />
+                <div class="form-text">Choose a new image to replace the current cover (JPG/PNG).</div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-gradient px-4"><i class="bi bi-check2 me-1"></i>Save changes</button>
+                <a class="btn btn-ghost" asp-action="Detail" asp-route-id="@Model.Post.Id">Cancel</a>
+            </div>
+        </form>
     </div>
 
-    <hr />
-
-    <form asp-action="Edit" asp-controller="Post" method="post" enctype="multipart/form-data">
-        <div class="validation-summary">
-            <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="col-lg-4">
+        <div class="panel mb-3">
+            <h3 style="font-size:.95rem;" class="mb-2"><i class="bi bi-image me-2"></i>Current cover</h3>
+            <img src="@currentImage" alt="Current cover" class="w-100 rounded-3" style="aspect-ratio:16/10;object-fit:cover;" onerror="this.src='/images/placeholder.svg'" />
         </div>
 
-        <input asp-for="Post.Id" hidden />
-        <div class="form-group">
-            <label asp-for="Post.Title"></label>
-            <input asp-for="Post.Title" class="form-control" />
-            <span asp-validation-for="Post.Title" class="text-danger"></span>
+        <div class="panel">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="feature-icon" style="width:36px;height:36px;font-size:.95rem;"><i class="bi bi-stars"></i></span>
+                <h2 style="font-size:1.02rem;" class="m-0">AI rewrite</h2>
+            </div>
+            <p class="text-soft small mb-3">Regenerate the body from the current title. The existing body will be replaced after generation.</p>
+            <form id="aiStudioForm" data-endpoint="@Url.Action("GeneratePost", "Ai")">
+                <label class="form-label" for="aiTopic">Topic</label>
+                <input id="aiTopic" class="form-control mb-2" value="@Model.Post.Title" required />
+                <label class="form-label" for="aiTone">Tone</label>
+                <select id="aiTone" class="form-select mb-3">
+                    <option value="professional">Professional</option>
+                    <option value="practical">Practical / how-to</option>
+                    <option value="opinionated">Opinionated</option>
+                    <option value="friendly">Friendly</option>
+                </select>
+                <button type="submit" class="btn btn-gradient w-100" id="aiGenerateBtn"><i class="bi bi-magic me-1"></i>Regenerate draft</button>
+            </form>
         </div>
-
-        <div class="form-group">
-            <label asp-for="Post.CategoryId"></label>
-            <select asp-for="Post.CategoryId" asp-items="Model.Categories" class="form-control">
-                <option value="">Select Category</option>
-            </select>
-            <span asp-validation-for="Post.CategoryId"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Post.Author"></label>
-            <input asp-for="Post.Author" class="form-control" />
-            <span asp-validation-for="Post.Author" class="text-danger"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Post.Content"></label>
-            <textarea asp-for="Post.Content" class="form-control" rows="5"> </textarea>
-            <span asp-validation-for="Post.Author" class="text-danger"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="FeatureImage"></label>
-            <input asp-for="FeatureImage" class="form-control" />
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-1">Update</button>
-        <a class="btn btn-secondary mt-1">Back to List</a>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
     <script src="https://cdn.tiny.cloud/1/8v7ap9no879e3vf48t9bipzno7dfbo8dgefvm9kgcttuz3nu/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-
     <script>
-        tinymce.init({
-            selector: 'textarea'
-        });
+        tinymce.init({ selector: 'textarea', height: 420, menubar: false, plugins: 'lists link code', toolbar: 'undo redo | bold italic | bullist numlist | link code' });
+
+        (function () {
+            const form = document.getElementById("aiStudioForm");
+            if (!form) return;
+
+            form.addEventListener("submit", async function (event) {
+                event.preventDefault();
+                const button = document.getElementById("aiGenerateBtn");
+                const original = button.innerHTML;
+                const topic = document.getElementById("aiTopic").value.trim();
+                if (!topic) return;
+
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Generating…';
+
+                try {
+                    const response = await fetch(form.dataset.endpoint, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ topic: topic, tone: document.getElementById("aiTone").value })
+                    });
+                    const data = await response.json();
+                    if (!data.ok) {
+                        window.bpToast?.(data.message || "AI generation is unavailable.", "error");
+                        return;
+                    }
+
+                    const titleInput = document.getElementById("Post_Title");
+                    if (titleInput && data.title) titleInput.value = data.title;
+
+                    const editor = window.tinymce && tinymce.get("Post_Content");
+                    if (editor) editor.setContent(data.content || "");
+                    else document.getElementById("Post_Content").value = data.content || "";
+
+                    window.bpToast?.("Draft regenerated — review before saving");
+                } catch (e) {
+                    window.bpToast?.("Could not reach the AI service.", "error");
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = original;
+                }
+            });
+        })();
     </script>
 }

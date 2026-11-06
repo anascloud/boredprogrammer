@@ -1,38 +1,105 @@
-﻿<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">Bored Programmer</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+﻿<nav class="navbar navbar-expand-lg site-nav sticky-top">
+    <div class="container-xxl px-3 px-lg-4">
+        <a class="navbar-brand brand" asp-controller="Post" asp-action="Index">
+            <span class="brand-mark"><i class="bi bi-stars"></i></span>
+            <span>Anascloud</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNav" aria-controls="siteNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarColor01">
-            <ul class="navbar-nav me-auto">
+
+        <div class="collapse navbar-collapse" id="siteNav">
+            <ul class="navbar-nav mx-auto align-items-lg-center gap-lg-1">
                 <li class="nav-item">
-                    <a class="nav-link active" asp-action="Index" asp-controller="Post">
-                        Home
-                        <span class="visually-hidden">(current)</span>
+                    <a class="nav-link" asp-controller="Post" asp-action="Index">Blog</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Features
+                        <span class="nav-badge">12</span>
                     </a>
+                    <div class="dropdown-menu feature-menu">
+                        <div class="feature-menu-head">
+                            <span class="eyebrow">Impressive features</span>
+                            <span class="text-soft small">Built for this live demo</span>
+                        </div>
+                        <div class="feature-menu-grid">
+                            <a class="feature-menu-item" asp-controller="Ai" asp-action="Assistant">
+                                <span class="fm-icon"><i class="bi bi-stars"></i></span>
+                                <span><strong>AI Assistant</strong><small>Groq-powered chat with blog + CV context</small></span>
+                            </a>
+                            <a class="feature-menu-item" asp-controller="Home" asp-action="Dashboard">
+                                <span class="fm-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                                <span><strong>Live Analytics</strong><small>Real metrics, charts and AI usage</small></span>
+                            </a>
+                            <a class="feature-menu-item" asp-controller="Post" asp-action="Index">
+                                <span class="fm-icon"><i class="bi bi-search"></i></span>
+                                <span><strong>Smart Search</strong><small>Search, filter and paginate posts</small></span>
+                            </a>
+                            <a class="feature-menu-item" asp-controller="Home" asp-action="Features">
+                                <span class="fm-icon"><i class="bi bi-grid-1x2"></i></span>
+                                <span><strong>Feature Tour</strong><small>Every feature, grouped by discipline</small></span>
+                            </a>
+                            <a class="feature-menu-item" asp-controller="Home" asp-action="Resume">
+                                <span class="fm-icon"><i class="bi bi-person-vcard"></i></span>
+                                <span><strong>Resume / CV</strong><small>9 years of full-stack + AI delivery</small></span>
+                            </a>
+                            <a class="feature-menu-item" asp-controller="Home" asp-action="Features" asp-fragment="security">
+                                <span class="fm-icon"><i class="bi bi-shield-check"></i></span>
+                                <span><strong>Secure by Default</strong><small>Identity, roles, rate limits, health checks</small></span>
+                            </a>
+                        </div>
+                        <a class="feature-menu-foot" asp-controller="Home" asp-action="Features">
+                            See all features <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Category</a>
+                    <a class="nav-link" asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="Resume">Resume</a>
                 </li>
             </ul>
 
-            @if (User.Identity.IsAuthenticated)
-            {
-                <div class="ms-auto me-5">
-                    <a asp-controller="Auth" asp-action="Logout" class="btn btn-outline-light">Logout</a>
-                </div>
-            }
-            else
-            {
-                <div class="d-flex ms-auto gap-2 me-5">
-                    <a asp-controller="Auth" asp-action="login" class="btn btn-outline-light">Login</a>
-                    <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-light">Register</a>
-                </div>
-            }
+            <div class="d-flex align-items-center gap-2 nav-actions">
+                <button class="icon-btn theme-toggle" type="button" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
+                    <i class="bi bi-moon-stars theme-icon-dark"></i>
+                    <i class="bi bi-brightness-high theme-icon-light"></i>
+                </button>
 
-           
-
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a class="btn btn-sm btn-gradient d-none d-sm-inline-flex" asp-controller="Post" asp-action="Create">
+                            <i class="bi bi-plus-lg"></i> New post
+                        </a>
+                    }
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-ghost dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="avatar">@((User.Identity.Name ?? "U")[0].ToString().ToUpper())</span>
+                            <span class="d-none d-md-inline">@(User.Identity.Name?.Split('@')[0])</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><span class="dropdown-item-text small text-soft">Signed in as @User.Identity.Name</span></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item" asp-controller="Home" asp-action="Dashboard"><i class="bi bi-graph-up me-2"></i>Dashboard</a></li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li><a class="dropdown-item" asp-controller="Post" asp-action="Create"><i class="bi bi-pencil-square me-2"></i>Write a post</a></li>
+                            }
+                            <li><a class="dropdown-item" asp-controller="Auth" asp-action="Logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <a class="btn btn-sm btn-ghost d-none d-sm-inline-flex" asp-controller="Auth" asp-action="Login">Login</a>
+                    <a class="btn btn-sm btn-gradient" asp-controller="Auth" asp-action="Register">Get started</a>
+                }
+            </div>
         </div>
     </div>
 </nav>

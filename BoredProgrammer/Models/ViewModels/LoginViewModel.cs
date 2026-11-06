@@ -6,9 +6,9 @@ namespace BoredProgrammer.Models.ViewModels
     {
         [Required(ErrorMessage = "Email is a Required Field")]
         [EmailAddress(ErrorMessage = "Email must be in proper format")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
         [Required(ErrorMessage = "Password is a Required Field")]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
     }
 }

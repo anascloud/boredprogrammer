@@ -1,52 +1,104 @@
-﻿@using BoredProgrammer.Helpers
-@using SyncSyntax.Models
-@model IEnumerable<Post>
+﻿@model IEnumerable<Post>
 @{
-    ViewData["Title"] = "Blog Posts";
+    ViewData["Title"] = "Blog";
+    var search = ViewBag.Search as string;
+    var selectedCategory = ViewBag.CategoryId as int?;
+    int page = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalPosts = ViewBag.TotalPosts ?? 0;
+    var categories = ViewBag.Categories as IEnumerable<Category> ?? Enumerable.Empty<Category>();
+    var posts = Model.ToList();
 }
 
-<div class="text-center m-3">
-    @if (ViewBag.Categories != null){
-        @foreach(var category in ViewBag.Categories)
-        {
-            <a asp-controller="Post" asp-action="Index" asp-route-categoryId="@category.Id" class="badge bg-warning text-decoration-none">@category.Name</a>
-        }
-    }
-</div>
+<section class="page-head">
+    <div class="row align-items-end g-3">
+        <div class="col-lg-8">
+            <span class="eyebrow">The blog</span>
+            <h1 class="mt-2">Build notes &amp; <span class="text-gradient">engineering</span></h1>
+            <p class="mb-0">@totalPosts published post@(totalPosts == 1 ? "" : "s") on .NET, AI, cloud and building products that last.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="btn btn-gradient" asp-action="Create"><i class="bi bi-plus-lg me-1"></i>Create post</a>
+            }
+            <a class="btn btn-ghost" asp-controller="Ai" asp-action="Assistant"><i class="bi bi-stars me-1"></i>Ask AI</a>
+        </div>
+    </div>
+</section>
 
-@if(User.IsInRole("Admin")){
-    <div class="text-end my-2">
-        <a class="btn btn-primary" asp-action="Create" asp-controller="Post">Create New Post</a>
+<section class="panel mb-4 reveal">
+    <form method="get" asp-controller="Post" asp-action="Index" class="search-bar">
+        <div class="flex-grow-1 position-relative">
+            <i class="bi bi-search position-absolute" style="left:1rem;top:50%;transform:translateY(-50%);color:var(--bp-muted);"></i>
+            <input class="form-control ps-5" type="search" name="q" value="@search" placeholder="Search titles, content or authors…" style="padding-left:2.75rem !important;" />
+        </div>
+        @if (selectedCategory.HasValue)
+        {
+            <input type="hidden" name="categoryId" value="@selectedCategory" />
+        }
+        <button class="btn btn-gradient px-4" type="submit">Search</button>
+        @if (!string.IsNullOrWhiteSpace(search) || selectedCategory.HasValue)
+        {
+            <a class="btn btn-ghost" asp-action="Index"><i class="bi bi-x-lg"></i></a>
+        }
+    </form>
+
+    <div class="d-flex flex-wrap gap-2 mt-3">
+        <a class="category-pill @(selectedCategory is null ? "active" : "")" asp-action="Index" asp-route-q="@search">
+            <i class="bi bi-grid"></i>All
+        </a>
+        @foreach (var category in categories)
+        {
+            <a class="category-pill @(selectedCategory == category.Id ? "active" : "")"
+               asp-action="Index" asp-route-categoryId="@category.Id" asp-route-q="@search">
+                @category.Name
+            </a>
+        }
+    </div>
+</section>
+
+@if (posts.Any())
+{
+    <div class="row g-4">
+        @foreach (var post in posts)
+        {
+            <div class="col-md-6 col-lg-4">
+                <partial name="_PostCard" model="post" />
+            </div>
+        }
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <nav class="mt-4" aria-label="Blog pagination">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(page <= 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(page - 1)" asp-route-q="@search" asp-route-categoryId="@selectedCategory" aria-label="Previous">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                @for (var i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-q="@search" asp-route-categoryId="@selectedCategory">@i</a>
+                    </li>
+                }
+                <li class="page-item @(page >= totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(page + 1)" asp-route-q="@search" asp-route-categoryId="@selectedCategory" aria-label="Next">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
+}
+else
+{
+    <div class="empty-state reveal">
+        <i class="bi bi-search"></i>
+        <h3>No posts found</h3>
+        <p class="mb-3">Try a different search term or clear the filters.</p>
+        <a class="btn btn-gradient" asp-action="Index">Clear filters</a>
     </div>
 }
-
-<div class="row row-cols-3 g-4">
-    @foreach(var post in Model)
-    {
-        <div class="col">
-            <div class="card h-100 border-0 shadow-lg rounded-l">
-                <img src="@post.FeatureImagePath" class="card-img-top" alt="@post.Title" style="height:300px; object-fit:cover;" />
-
-                <div class="card-body">
-                    <h5 class="card-title">@post.Title</h5>
-                    <p class="text-muted mb-2">Published on @post.PublishedDate.ToString("MMM dd, yyyy")</p>
-                    @{
-                        var content = RemoveHtmlTagHelper.RemoveHtmlTags(post.Content);
-                    }
-                    <p class="card-text">
-                        @(content.Length>100 ? content.Substring(0,100) + "..." : content)
-                    </p>
-
-                    <span class="badge bg-secondary">@post.Category?.Name</span>
-                </div>
-
-                <div class="card-footer d-flex justify-content-between align-content-center">
-                    <a class="btn btn-primary btn-sm" asp-controller="Post" asp-action="Detail" asp-route-id="@post.Id">Read More</a>
-                    <div class="text-end">
-                        <div class="text-muted"> By @post.Author</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-</div>

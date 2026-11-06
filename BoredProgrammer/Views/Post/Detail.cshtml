@@ -1,123 +1,202 @@
-﻿@using SyncSyntax.Models
+﻿@using BoredProgrammer.Helpers
 @model Post
-
 @{
     ViewData["Title"] = Model.Title;
+    var plain = RemoveHtmlTagHelper.RemoveHtmlTags(Model.Content ?? string.Empty);
+    var words = plain.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+    var readMinutes = Math.Max(1, (int)Math.Ceiling(words / 220.0));
+    var image = string.IsNullOrWhiteSpace(Model.FeatureImagePath) ? "/images/placeholder.svg" : Model.FeatureImagePath;
+    var comments = Model.Comments?.OrderByDescending(c => c.CommentDate).ToList() ?? new List<Comment>();
+    var related = ViewBag.RelatedPosts as IEnumerable<Post> ?? Enumerable.Empty<Post>();
 }
-<style>
-    .content-wrapper {
-        padding: 20px;
-        max-width: 1000px;
-        margin: 0 auto;
-        font-family: sans-serif
-    }
 
-    .feature-image {
-        width: 100%;
-        height: 500px;
-        object-fit: cover;
-        margin-bottom: 20px;
-    }
-</style>
+<div class="d-flex flex-wrap gap-2 pt-2">
+    <a class="chip" asp-action="Index"><i class="bi bi-arrow-left"></i>Back to blog</a>
+    <span class="chip"><i class="bi bi-clock"></i>@readMinutes min read</span>
+    <span class="chip"><i class="bi bi-chat-dots"></i>@comments.Count comments</span>
+</div>
 
-@if (User.IsInRole("Admin"))
-{
-    <div class="text-end">
-        <a class="btn btn-secondary my-3" asp-controller="Post" asp-action="Edit" asp-route-id="@Model.Id">Edit Post</a>
-        <a class="btn btn-danger mx-3 my-3" asp-controller="Post" asp-action="Delete" asp-route-id="@Model.Id">Delete Post</a>
+<article class="article-hero reveal">
+    <img src="@image" alt="@Model.Title" onerror="this.src='/images/placeholder.svg'" />
+    <div class="overlay">
+        <span class="badge badge-category">@(Model.Category?.Name ?? "General")</span>
+        <h1>@Model.Title</h1>
+        <div class="article-meta">
+            <span class="d-inline-flex align-items-center gap-2">
+                <span class="avatar">@(string.IsNullOrWhiteSpace(Model.Author) ? "A" : Model.Author[..1].ToUpper())</span>
+                @Model.Author
+            </span>
+            <span><i class="bi bi-calendar3 me-1"></i>@Model.PublishedDate.ToString("MMMM dd, yyyy")</span>
+            <span><i class="bi bi-clock me-1"></i>@readMinutes min read</span>
+        </div>
     </div>
-}
+</article>
 
-<div class="content-wrapper">
-    <h1>@Model.Title</h1>
-    <p>
-        <span class="badge bg-primary">By:</span> @Model.Author | <span class="badge bg-primary">
-        Published on
-    </span> @Model.PublishedDate.ToString("MMMM dd,yyyy")
-</p>
-<p><span class="badge bg-secondary">Category</span> @Model.Category.Name</p>
-<img src="@Model.FeatureImagePath" alt="@Model.Title" class="feature-image" />
-<hr />
-<div>@Html.Raw(Model.Content)</div>
-<hr />
-
-@if (Model.Comments.Any())
-{
-    <div id="commentSection">
-        @foreach (var comment in Model.Comments)
+<div class="article-wrap">
+    <div class="article-actions">
+        <button class="btn btn-sm btn-gradient" type="button"
+                data-ai-summary
+                data-post-id="@Model.Id"
+                data-target="aiSummary"
+                data-endpoint="@Url.Action("Summarize", "Ai")">
+            <i class="bi bi-stars me-1"></i>AI summary
+        </button>
+        <button class="btn btn-sm btn-ghost" type="button" data-copy=""><i class="bi bi-link-45deg me-1"></i>Copy link</button>
+        <a class="btn btn-sm btn-ghost" asp-controller="Ai" asp-action="Assistant"><i class="bi bi-chat-dots me-1"></i>Ask AI about this</a>
+        @if (User.IsInRole("Admin"))
         {
-            <div class="card mb-3 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">@comment.UserName</h5>
-                    <p class="card-text text-muted">@comment.CommentDate.ToString("MMMM dd,yyyy")</p>
-                    <p class="card-text">@comment.Content</p>
-                </div>
-            </div>
+            <a class="btn btn-sm btn-secondary ms-auto" asp-action="Edit" asp-route-id="@Model.Id"><i class="bi bi-pencil me-1"></i>Edit</a>
+            <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@Model.Id"><i class="bi bi-trash me-1"></i>Delete</a>
         }
     </div>
-}
-else
-{
-    <p class="text-muted">No comments yet. Be the first to comment</p>
-}
 
-    @if (User.Identity.IsAuthenticated)
-    {
+    <div class="ai-summary d-none" id="aiSummary" aria-live="polite"></div>
 
-        <h4>Add a Comment</h4>
+    <div class="prose reveal">
+        @Html.Raw(Model.Content)
+    </div>
 
-        <form id="commentForm">
-            <div class="form-group">
-                <label for="Username">Name</label>
-                <input for="Username" id="Username" name="Username" required class="form-control" />
+    <hr class="hairline my-4" />
+
+    <section id="comments">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h2 class="m-0" style="font-size:1.3rem;">Comments <span class="text-soft">(@comments.Count)</span></h2>
+        </div>
+
+        <div id="commentSection">
+            @if (comments.Any())
+            {
+                foreach (var comment in comments)
+                {
+                    <div class="comment-card">
+                        <header>
+                            <span class="avatar">@(string.IsNullOrWhiteSpace(comment.UserName) ? "U" : comment.UserName[..1].ToUpper())</span>
+                            <div>
+                                <strong class="d-block" style="font-size:.88rem;">@comment.UserName</strong>
+                                <span class="text-soft" style="font-size:.74rem;">@comment.CommentDate.ToString("MMMM dd, yyyy")</span>
+                            </div>
+                        </header>
+                        <p>@comment.Content</p>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-soft" id="noComments">No comments yet — be the first to share a thought.</p>
+            }
+        </div>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form id="commentForm" class="panel mt-3">
+                <h3 style="font-size:1rem;" class="mb-3"><i class="bi bi-chat-left-text me-2"></i>Add a comment</h3>
+                <div class="row g-2">
+                    <div class="col-md-5">
+                        <label class="form-label" for="Username">Name</label>
+                        <input id="Username" name="Username" required class="form-control" value="@User.Identity.Name?.Split('@')[0]" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="Content">Comment</label>
+                        <textarea id="Content" name="Content" rows="3" required class="form-control" placeholder="Share your thoughts…"></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-gradient mt-3"><i class="bi bi-send me-2"></i>Post comment</button>
+            </form>
+        }
+        else
+        {
+            <div class="panel mt-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <span class="text-soft"><i class="bi bi-lock me-2"></i>Login to join the discussion.</span>
+                <a class="btn btn-sm btn-gradient" asp-controller="Auth" asp-action="Login">Login</a>
             </div>
-
-            <div class="form-group">
-                <label for="Content">Content</label>
-                <textarea for="Content" id="Content" name="Content" rows="3" required class="form-control"></textarea>
-            </div>
-
-            <button type="submit" class="btn btn-primary mt-2 p-2 rounded">Submit Comment </button>
-        </form>
-    }
+        }
+    </section>
 </div>
+
+@if (related.Any())
+{
+    <section class="section">
+        <div class="d-flex align-items-end justify-content-between mb-3">
+            <div>
+                <span class="eyebrow">Keep reading</span>
+                <h2 class="mt-1 mb-0" style="font-size:1.4rem;">Related posts</h2>
+            </div>
+            <a class="chip" asp-action="Index" asp-route-categoryId="@Model.CategoryId">More in @Model.Category?.Name</a>
+        </div>
+        <div class="row g-4">
+            @foreach (var post in related)
+            {
+                <div class="col-md-4">
+                    <partial name="_PostCard" model="post" />
+                </div>
+            }
+        </div>
+    </section>
+}
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            $("#commentForm").on('submit', function (event) {
-                event.preventDefault();
-                var userName = $("#Username").val();
-                var content = $("#Content").val();
-                var postId = @Model.Id;
+        (function () {
+            const form = document.getElementById("commentForm");
+            if (!form) return;
 
-                $.ajax({
-                    //https:localhost:7036/Post/AddComment
-                    url: '@Url.Action("AddComment", "Post")',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        Username: userName,
-                        Content: content,
-                        PostId: postId
-                    }),
-                    success: function (response) {
-                        console.log("response", response);
-                        $('#commentForm')[0].reset();
-                        $('#commentSection').append(
-                            `
-                                <div class="card mb-3 shadow-sm">
-                                    <div class="card-body">
-                                    <h5 class="card-title">${response.username}</h5>
-                                     <p class="card-text text-muted">${response.commentDate}</p>
-                                     <p class="card-text">${response.content}</p>
-                                    </div>
-                                </div>
-                                    `
-                        )
-                    }
-                })
+            form.addEventListener("submit", async function (event) {
+                event.preventDefault();
+                const button = form.querySelector("button[type=submit]");
+                const original = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Posting…';
+
+                try {
+                    const response = await fetch('@Url.Action("AddComment", "Post")', {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            username: document.getElementById("Username").value,
+                            content: document.getElementById("Content").value,
+                            postId: @Model.Id
+                        })
+                    });
+
+                    if (!response.ok) throw new Error("failed");
+                    const data = await response.json();
+
+                    document.getElementById("noComments")?.remove();
+
+                    const card = document.createElement("div");
+                    card.className = "comment-card";
+
+                    const header = document.createElement("header");
+                    const avatar = document.createElement("span");
+                    avatar.className = "avatar";
+                    avatar.textContent = (data.username || "U").charAt(0).toUpperCase();
+                    const info = document.createElement("div");
+                    const name = document.createElement("strong");
+                    name.className = "d-block";
+                    name.style.fontSize = ".88rem";
+                    name.textContent = data.username;
+                    const date = document.createElement("span");
+                    date.className = "text-soft";
+                    date.style.fontSize = ".74rem";
+                    date.textContent = data.commentDate;
+                    info.append(name, date);
+                    header.append(avatar, info);
+
+                    const body = document.createElement("p");
+                    body.textContent = data.content;
+
+                    card.append(header, body);
+                    document.getElementById("commentSection").prepend(card);
+
+                    form.reset();
+                    window.bpToast?.("Comment posted");
+                } catch (e) {
+                    window.bpToast?.("Could not post the comment. Please try again.", "error");
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = original;
+                }
             });
-        });
+        })();
     </script>
 }

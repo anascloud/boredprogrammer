@@ -1,0 +1,40 @@
+<div class="ai-widget" id="aiWidget" data-ai-chat data-endpoint="@Url.Action("Chat", "Ai")">
+    <button class="ai-fab" id="aiFab" data-ai-open type="button" aria-label="Open AI assistant" aria-expanded="false">
+        <span class="ai-fab-ring"></span>
+        <i class="bi bi-stars"></i>
+        <span class="ai-fab-label">Ask AI</span>
+    </button>
+
+    <section class="ai-panel" id="aiPanel" data-ai-panel aria-hidden="true" aria-label="AI assistant">
+        <header class="ai-panel-head">
+            <span class="ai-avatar"><i class="bi bi-stars"></i></span>
+            <div class="flex-grow-1">
+                <strong>AI Assistant</strong>
+                <small><span class="status-dot"></span> Powered by Groq · knows this blog &amp; CV</small>
+            </div>
+            <button class="icon-btn" type="button" data-ai-close aria-label="Close AI assistant"><i class="bi bi-x-lg"></i></button>
+        </header>
+
+        <div class="ai-messages" data-ai-messages>
+            <div class="ai-msg ai-msg-bot">
+                <p>Hi! I'm @PortfolioProfile.Name's AI assistant. Ask me about the experience, skills, projects — or anything on this blog.</p>
+            </div>
+            <div class="ai-suggestions">
+                <button type="button" data-prompt="What kind of AI work have you shipped?">AI experience</button>
+                <button type="button" data-prompt="Summarise the strongest reasons to hire you.">Why hire me?</button>
+                <button type="button" data-prompt="Which blog posts should I read first?">Recommend posts</button>
+            </div>
+        </div>
+
+        <form class="ai-form" data-ai-form>
+            <textarea data-ai-input rows="1" maxlength="1500" placeholder="Ask about experience, projects or posts…" aria-label="Message"></textarea>
+            <button class="btn btn-gradient ai-send" data-ai-send type="submit" aria-label="Send message">
+                <i class="bi bi-send"></i>
+            </button>
+        </form>
+        <div class="ai-foot">
+            <span>Demo assistant · rate limited</span>
+            <a asp-controller="Ai" asp-action="Assistant">Full screen <i class="bi bi-arrow-up-right"></i></a>
+        </div>
+    </section>
+</div>

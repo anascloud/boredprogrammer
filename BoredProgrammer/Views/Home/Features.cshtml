@@ -1,0 +1,157 @@
+@{
+    ViewData["Title"] = "Impressive Features";
+    var groups = new[]
+    {
+        new
+        {
+            Id = "ai",
+            Title = "AI & Intelligence",
+            Subtitle = "Applied LLM features — live, rate-limited and context-aware.",
+            Items = new[]
+            {
+                new { Icon = "bi-stars", Title = "AI assistant with blog context", Text = "Groq chat that knows every post, the CV, projects and skills — not a generic chatbot.", Tags = new[] { "Groq", "C#", "Prompt design" }, Link = Url.Action("Assistant", "Ai"), Cta = "Chat now" },
+                new { Icon = "bi-magic", Title = "AI content studio", Text = "Generate a structured draft — title, excerpt, tags and HTML body — from a single topic.", Tags = new[] { "JSON mode", "Admin only" }, Link = Url.Action("Create", "Post"), Cta = "Open studio" },
+                new { Icon = "bi-card-text", Title = "One-click article summaries", Text = "Turn a long post into three bullets and a key takeaway for busy readers.", Tags = new[] { "Summarisation", "UX" }, Link = Url.Action("Index", "Post"), Cta = "Open a post" },
+                new { Icon = "bi-activity", Title = "AI usage telemetry", Text = "Every AI call is counted in an in-memory tracker and surfaced on the dashboard.", Tags = new[] { "Observability" }, Link = Url.Action("Dashboard", "Home"), Cta = "View metrics" },
+                new { Icon = "bi-shield-exclamation", Title = "Guardrails & rate limits", Text = "Input caps, per-IP fixed-window rate limiting and safe error messages.", Tags = new[] { "Security", "Resilience" }, Link = (string?)"#security", Cta = "Details" },
+                new { Icon = "bi-diagram-2", Title = "Provider-agnostic AI layer", Text = "A single GroqService isolates the provider, so swapping models is a config change.", Tags = new[] { "SOLID", "DI" }, Link = (string?)"#engineering", Cta = "Architecture" }
+            }
+        },
+        new
+        {
+            Id = "product",
+            Title = "Product & Experience",
+            Subtitle = "The SaaS details that make a demo feel like a real product.",
+            Items = new[]
+            {
+                new { Icon = "bi-window-stack", Title = "Conversion-focused landing page", Text = "Hero, social proof, feature tour and clear calls to action — built for hiring managers.", Tags = new[] { "UX", "Copy" }, Link = (string?)"/", Cta = "View home" },
+                new { Icon = "bi-search", Title = "Server-side search & filters", Text = "Search titles, content and authors, filter by category and paginate without client-side hacks.", Tags = new[] { "EF Core", "LINQ" }, Link = Url.Action("Index", "Post"), Cta = "Try search" },
+                new { Icon = "bi-moon-stars", Title = "Dark / light themes", Text = "Persisted theme preference with no flash on load and a full token-based palette.", Tags = new[] { "CSS tokens", "localStorage" }, Link = (string?)"#theme", Cta = "Toggle in navbar" },
+                new { Icon = "bi-journal-richtext", Title = "Editorial article experience", Text = "Reading time, related posts, rich HTML content, comments and an AI summary panel.", Tags = new[] { "Content", "a11y" }, Link = Url.Action("Index", "Post"), Cta = "Read" },
+                new { Icon = "bi-phone", Title = "Responsive by default", Text = "Mobile-first layouts, collapsible navigation and touch-friendly assistant controls.", Tags = new[] { "Bootstrap 5", "CSS" }, Link = (string?)"/", Cta = "Resize" },
+                new { Icon = "bi-mouse2", Title = "Micro-interactions", Text = "Scroll reveal, pointer glow, animated counters and toast feedback for every action.", Tags = new[] { "Motion", "JS" }, Link = (string?)"/", Cta = "Explore" }
+            }
+        },
+        new
+        {
+            Id = "engineering",
+            Title = "Engineering",
+            Subtitle = "Architecture and delivery choices under the hood.",
+            Items = new[]
+            {
+                new { Icon = "bi-diagram-3", Title = "Clean MVC + service layer", Text = "Controllers stay thin; AI, portfolio data and cross-cutting concerns live in focused services.", Tags = new[] { "ASP.NET Core", "DI" }, Link = (string?)"#engineering", Cta = "Overview" },
+                new { Icon = "bi-database", Title = "EF Core & SQL Server", Text = "Code-first migrations, seeded data and async queries against a managed SQL database.", Tags = new[] { "EF Core", "SQL Server" }, Link = Url.Action("Dashboard", "Home"), Cta = "See live data" },
+                new { Icon = "bi-person-badge", Title = "Identity & role-based access", Text = "Admin/User roles protect authoring routes while public readers stay frictionless.", Tags = new[] { "Identity", "RBAC" }, Link = Url.Action("Login", "Auth"), Cta = "Login" },
+                new { Icon = "bi-hdd-network", Title = "Cloud-ready operations", Text = "Response compression, health checks, environment config and zero-downtime-friendly startup.", Tags = new[] { ".NET 10", "Ops" }, Link = (string?)"/health", Cta = "Health check" },
+                new { Icon = "bi-braces", Title = "Razor + typed view models", Text = "Strongly typed views, shared partials and reusable card components keep the UI maintainable.", Tags = new[] { "Razor", "C#" }, Link = (string?)"#engineering", Cta = "Details" },
+                new { Icon = "bi-cloud-arrow-up", Title = "Deployed on live cloud", Text = "Running at anascloud.runasp.net with a production SQL Server database and seeded admin.", Tags = new[] { "Deployment" }, Link = (string?)"http://anascloud.runasp.net", Cta = "Visit live" }
+            }
+        },
+        new
+        {
+            Id = "security",
+            Title = "Security & Platform",
+            Subtitle = "Small-surface, secure defaults — the things hiring managers notice.",
+            Items = new[]
+            {
+                new { Icon = "bi-shield-check", Title = "Authentication & authorization", Text = "Cookie auth, protected admin routes, access-denied flow and persistent sessions.", Tags = new[] { "AuthN/AuthZ" }, Link = Url.Action("Login", "Auth"), Cta = "Try login" },
+                new { Icon = "bi-speedometer2", Title = "Per-IP rate limiting", Text = "AI endpoints use a fixed-window limiter so the demo stays available for everyone.", Tags = new[] { "Throttling" }, Link = (string?)"#security", Cta = "Details" },
+                new { Icon = "bi-key", Title = "Secrets outside source", Text = "Groq keys load from configuration or GROQ_API_KEY environment variables.", Tags = new[] { "Config", "Secrets" }, Link = (string?)"#security", Cta = "Details" },
+                new { Icon = "bi-heart-pulse", Title = "Health endpoint", Text = "/health returns live status for uptime monitors and deployment smoke tests.", Tags = new[] { "Monitoring" }, Link = (string?)"/health", Cta = "Check now" },
+                new { Icon = "bi-input-cursor-text", Title = "Server-side validation", Text = "Model validation, file-type allow-lists and safe HTML handling on write paths.", Tags = new[] { "Validation" }, Link = (string?)"#security", Cta = "Details" },
+                new { Icon = "bi-lock", Title = "HTTPS & HSTS", Text = "Redirects, HSTS in production and secure cookie configuration by default.", Tags = new[] { "Transport" }, Link = (string?)"#security", Cta = "Details" }
+            }
+        }
+    };
+}
+
+<section class="page-head">
+    <div class="row align-items-end g-3">
+        <div class="col-lg-8">
+            <span class="eyebrow">Feature tour</span>
+            <h1 class="mt-2">Impressive features, <span class="text-gradient">built to be inspected</span>.</h1>
+            <p class="mb-0">
+                This is the focus list — every card below maps to something you can click, test and review live.
+                AI, product craft, engineering and security in one demo.
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a class="btn btn-gradient px-3" asp-controller="Ai" asp-action="Assistant"><i class="bi bi-stars me-2"></i>Start with AI</a>
+            <a class="btn btn-ghost px-3" asp-controller="Home" asp-action="Dashboard"><i class="bi bi-graph-up me-2"></i>Dashboard</a>
+        </div>
+    </div>
+</section>
+
+<hr class="hairline" />
+
+@foreach (var group in groups)
+{
+    <section class="section feature-group" id="@group.Id">
+        <div class="feature-group-head reveal">
+            <div>
+                <span class="eyebrow">@group.Title</span>
+                <h2 class="mt-1">@group.Subtitle</h2>
+            </div>
+            <span class="chip">@group.Items.Length features</span>
+        </div>
+        <div class="row g-3">
+            @foreach (var item in group.Items)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card reveal h-100 d-flex flex-column">
+                        <span class="feature-icon"><i class="bi @item.Icon"></i></span>
+                        <h3>@item.Title</h3>
+                        <p>@item.Text</p>
+                        <div class="feature-tags">
+                            @foreach (var tag in item.Tags)
+                            {
+                                <span class="tag">@tag</span>
+                            }
+                        </div>
+                        <a class="try-link mt-auto" href="@item.Link" target="@(item.Link?.StartsWith("http") == true ? "_blank" : null)" rel="@(item.Link?.StartsWith("http") == true ? "noopener" : null)">
+                            @item.Cta <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<section class="section">
+    <div class="panel reveal">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-7">
+                <span class="eyebrow">Under the hood</span>
+                <h2 class="mt-2">A stack chosen for <span class="text-gradient">longevity</span>.</h2>
+                <p class="text-soft mb-3">
+                    ASP.NET Core MVC on .NET 10, EF Core with SQL Server, Identity, a typed Groq client,
+                    Bootstrap 5 and a custom token-based design system. No UI framework bloat.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach (var skill in PortfolioProfile.Skills)
+                    {
+                        <span class="chip"><i class="bi @skill.Icon"></i>@skill.Name</span>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="row g-2">
+                    @foreach (var project in PortfolioProfile.Projects)
+                    {
+                        <div class="col-12">
+                            <a class="list-row" href="@Url.Action("Resume", "Home")">
+                                <span class="feature-icon" style="width:38px;height:38px;font-size:1rem;"><i class="bi @project.Icon"></i></span>
+                                <span>
+                                    <span class="row-title d-block">@project.Name</span>
+                                    <span class="row-sub">@project.Tagline</span>
+                                </span>
+                                <span class="row-badge chip">@project.Impact</span>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

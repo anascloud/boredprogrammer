@@ -1,8 +1,180 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model HomeViewModel
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+            <span class="hero-badge"><span class="dot"></span> Open to senior .NET + AI roles</span>
+            <h1 class="hero-title">
+                Production-grade <span class="text-gradient">.NET</span>,<br />
+                with AI that actually ships.
+            </h1>
+            <p class="hero-sub">
+                @PortfolioProfile.Tagline I have <strong>@PortfolioProfile.YearsExperience years</strong> of experience
+                building secure SaaS, cloud platforms and LLM products — and this live demo shows how I work.
+            </p>
+            <div class="hero-actions">
+                <a class="btn btn-gradient btn-lg px-4" asp-controller="Post" asp-action="Index">
+                    <i class="bi bi-journal-code me-2"></i>Explore the blog
+                </a>
+                <a class="btn btn-ghost btn-lg px-4" asp-controller="Ai" asp-action="Assistant">
+                    <i class="bi bi-stars me-2"></i>Try the AI assistant
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <strong><span data-count="@PortfolioProfile.YearsExperience">0</span>+</strong>
+                    <span>Years experience</span>
+                </div>
+                <div class="hero-stat">
+                    <strong><span data-count="@Model.PostCount">0</span></strong>
+                    <span>Blog posts</span>
+                </div>
+                <div class="hero-stat">
+                    <strong><span data-count="12">0</span></strong>
+                    <span>Live features</span>
+                </div>
+                <div class="hero-stat">
+                    <strong>99.9<span>%</span></strong>
+                    <span>Cloud uptime</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="hero-visual">
+                <div class="mock-window">
+                    <div class="mock-bar">
+                        <i></i><i></i><i></i>
+                        <span>ai-assistant.tsx</span>
+                    </div>
+                    <div class="mock-body">
+                        <div class="mock-chat">
+                            <span class="ai-mini"><i class="bi bi-stars"></i></span>
+                            <div class="bubble bubble-ai">Hi! I can reason over this blog and @PortfolioProfile.Name's CV. What would you like to know?</div>
+                        </div>
+                        <div class="mock-chat">
+                            <div class="bubble bubble-user">What is the strongest reason to hire you?</div>
+                        </div>
+                        <div class="mock-chat">
+                            <span class="ai-mini"><i class="bi bi-stars"></i></span>
+                            <div class="bubble bubble-ai">
+                                9 years shipping production .NET + AI — from RAG pipelines and multi-tenant SaaS
+                                to measurable outcomes like <strong>38% lower cloud spend</strong>.
+                            </div>
+                        </div>
+                        <div class="mock-line w-90"></div>
+                        <div class="mock-line w-70"></div>
+                        <div class="mock-line w-45"></div>
+                    </div>
+                </div>
+                <div class="floating-chip chip-a"><i class="bi bi-lightning-charge-fill"></i> Groq · sub-second inference</div>
+                <div class="floating-chip chip-b"><i class="bi bi-shield-check"></i> Identity + rate limiting</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="hairline" />
+
+<section class="section">
+    <div class="section-head reveal">
+        <span class="eyebrow">What makes this demo different</span>
+        <h2>Twelve features. One <span class="text-gradient">production story</span>.</h2>
+        <p>Every feature below is live on this deployment — not a mockup. Explore the ones most relevant to your role.</p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-4 reveal">
+            <a class="feature-card d-block" asp-controller="Ai" asp-action="Assistant">
+                <span class="feature-icon"><i class="bi bi-stars"></i></span>
+                <h3>AI assistant with real context</h3>
+                <p>A Groq-powered chat that knows this blog, the CV and my project history. Streaming-ready UX with graceful fallbacks.</p>
+                <span class="try-link">Try the assistant <i class="bi bi-arrow-right"></i></span>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-4 reveal">
+            <a class="feature-card d-block" asp-controller="Home" asp-action="Dashboard">
+                <span class="feature-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                <h3>Live analytics dashboard</h3>
+                <p>Real counts from SQL Server, category breakdowns, publishing cadence and AI usage telemetry.</p>
+                <span class="try-link">Open dashboard <i class="bi bi-arrow-right"></i></span>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-4 reveal">
+            <a class="feature-card d-block" asp-controller="Post" asp-action="Index">
+                <span class="feature-icon"><i class="bi bi-search"></i></span>
+                <h3>Search, filters & pagination</h3>
+                <p>Server-side search across titles, content and authors, category filters and clean pagination.</p>
+                <span class="try-link">Search the blog <i class="bi bi-arrow-right"></i></span>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-4 reveal">
+            <a class="feature-card d-block" asp-controller="Home" asp-action="Features" asp-fragment="ai">
+                <span class="feature-icon"><i class="bi bi-magic"></i></span>
+                <h3>AI content studio</h3>
+                <p>Admins can generate a structured draft — title, excerpt, tags and HTML body — in one click.</p>
+                <span class="try-link">See how it works <i class="bi bi-arrow-right"></i></span>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-4 reveal">
+            <a class="feature-card d-block" asp-controller="Auth" asp-action="Login">
+                <span class="feature-icon"><i class="bi bi-shield-lock"></i></span>
+                <h3>Secure identity & roles</h3>
+                <p>ASP.NET Core Identity with Admin/User roles, protected routes and a frictionless demo login.</p>
+                <span class="try-link">View login <i class="bi bi-arrow-right"></i></span>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-4 reveal">
+            <a class="feature-card d-block" asp-controller="Home" asp-action="Features" asp-fragment="platform">
+                <span class="feature-icon"><i class="bi bi-hdd-network"></i></span>
+                <h3>Production operations</h3>
+                <p>Health checks, response compression, rate limiting and environment-driven secrets.</p>
+                <span class="try-link">Platform details <i class="bi bi-arrow-right"></i></span>
+            </a>
+        </div>
+    </div>
+</section>
+
+@if (Model.LatestPosts.Any())
+{
+    <hr class="hairline" />
+    <section class="section">
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-4 reveal">
+            <div>
+                <span class="eyebrow">Latest writing</span>
+                <h2 class="mb-0 mt-1">Notes from the <span class="text-gradient">build</span></h2>
+            </div>
+            <a class="btn btn-ghost btn-sm" asp-controller="Post" asp-action="Index">All posts <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+        <div class="row g-4">
+            @foreach (var post in Model.LatestPosts)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <partial name="_PostCard" model="post" />
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<section class="section">
+    <div class="panel reveal">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <span class="eyebrow">Available for senior roles</span>
+                <h2 class="mt-2 mb-2" style="font-size: clamp(1.6rem, 3vw, 2.3rem);">Let's build something measurable.</h2>
+                <p class="text-soft mb-0">
+                    Full-stack .NET, modern frontends and applied AI. If you need someone who can own the architecture
+                    and still ship the feature, let's talk.
+                </p>
+            </div>
+            <div class="col-lg-4 d-flex flex-wrap gap-2 justify-content-lg-end">
+                <a class="btn btn-gradient px-4" href="mailto:@PortfolioProfile.Email"><i class="bi bi-envelope me-2"></i>Hire me</a>
+                <a class="btn btn-ghost px-4" asp-controller="Home" asp-action="Resume"><i class="bi bi-person-vcard me-2"></i>View CV</a>
+            </div>
+        </div>
+    </div>
+</section>

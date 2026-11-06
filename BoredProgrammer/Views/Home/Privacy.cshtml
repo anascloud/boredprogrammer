@@ -1,6 +1,19 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
+<section class="page-head">
+    <span class="eyebrow">Legal</span>
+    <h1 class="mt-2">Privacy <span class="text-gradient">policy</span></h1>
+    <p class="mb-0">This is a demo application used to showcase engineering and AI features.</p>
+</section>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="panel">
+    <div class="prose" style="max-width:760px;">
+        <h2>What this demo stores</h2>
+        <p>Account email addresses and hashed passwords are stored by ASP.NET Core Identity. Comments you post are stored in the demo database. AI prompts are sent to the configured Groq endpoint to generate a response; they are not persisted by this application.</p>
+        <h2>Cookies</h2>
+        <p>Authentication cookies keep you signed in. A local preference stores your dark/light theme choice in the browser only.</p>
+        <h2>Contact</h2>
+        <p>Questions about this demo? Email <a href="mailto:@PortfolioProfile.Email">@PortfolioProfile.Email</a>.</p>
+    </div>
+</div>
