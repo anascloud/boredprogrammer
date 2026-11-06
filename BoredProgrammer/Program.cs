@@ -32,7 +32,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
-{
+{   
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+
     var _userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
     var _roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
@@ -81,6 +84,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
